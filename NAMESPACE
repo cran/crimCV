@@ -1,0 +1,9 @@
+useDynLib(crimCV)
+
+export(crimCV)
+importFrom(splines, bs)
+
+S3method(plot, dmZIP)
+S3method(summary, dmZIP)
+S3method(plot, dmZIPt)
+S3method(summary, dmZIPt)
