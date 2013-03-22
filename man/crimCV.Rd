@@ -71,27 +71,17 @@ library(crimCV)
 
 # Load the "divide-and-round" TO1 dataset
 data(TO1adj)
-# Fit a 2 component ZIP(tau) model of degree 2 and calculate the CVE
-out1<-crimCV(TO1adj,2,dpolyp=2,rcv=TRUE)
+# Fit a 2 component ZIP(tau) model of degree 2.  Here the CVE is not
+# calculated and only ~1/4 of the data is used so that the code will
+# run quickly enough to satisfy CRAN's package policies.  To compute
+# CVE run as:
+# out1<-crimCV(TO1adj,2,dpolyp=2,rcv=TRUE)
+subTO1adj<-TO1adj[1:100,]
+out1<-crimCV(subTO1adj,2,dpolyp=2,init=5)
 # Plot the component trajectories
 plot(out1)
 # Print out some useful output
 summary(out1)
-
-# Fit a 3 component ZIP model of degree 2-2 (do not calculate CVE)
-out2<-crimCV(TO1adj,3,dpolyp=2,dpolyl=2,model="ZIP")
-plot(out2)
-summary(out2)
-
-# Load the unadjusted TO2 data and the associated time-at-risk
-data(TO2)
-data(TO2Risk)
-# Fit a 2 component ZIP(tau) model of degree 4 to TO2 correcting for
-# time-at-risk (no CVE calculation which can be added by using adding
-# "rcv=TRUE" to the function call)
-out3<-crimCV(TO2,2,dpolyp=4,Risk=TO2Risk)
-plot(out3)
-summary(out3)
 }
 
 \keyword{ Zero-inflated Poisson model}

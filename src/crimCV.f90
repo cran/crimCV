@@ -154,6 +154,7 @@ contains
   end function gamma_dv
   
 end module gamma_mod
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
 !!! Copyright (C) 2011 Jason D. Nielsen
@@ -208,19 +209,19 @@ module matrix
 
 contains      
 
-  subroutine printmat(A)
-    implicit none
-    real(dp), dimension(:,:):: A
-    integer:: i, j
-    do i=1,size(A,1)
-       write(*,fmt="(a2)",advance="no") "|"
-       do j=1,size(A,2)
-          write(*,fmt="(f9.4)",advance="no") A(i,j)
-       end do
-       write(*,fmt="(a2)") " |"
-    end do
-    write(*,*)
-  end subroutine printmat
+!  subroutine printmat(A)
+!    implicit none
+!    real(dp), dimension(:,:):: A
+!    integer:: i, j
+!    do i=1,size(A,1)
+!       write(*,fmt="(a2)",advance="no") "|"
+!       do j=1,size(A,2)
+!          write(*,fmt="(f9.4)",advance="no") A(i,j)
+!       end do
+!       write(*,fmt="(a2)") " |"
+!    end do
+!    write(*,*)
+!  end subroutine printmat
 
   function mm(A,B) result(out)
     implicit none
@@ -361,9 +362,9 @@ contains
     real(dp):: w(1)
     n=size(A,1)
     nrhs=1
-    if(n/=size(A,2)) then
-       stop 'Matrix must be square'
-    end if
+!    if(n/=size(A,2)) then
+!       stop 'Matrix must be square'
+!    end if
     D=A
     c=reshape(b,(/n,1/))
     lwrk=-1
@@ -392,9 +393,9 @@ contains
     real(dp):: w(1)
     n=size(A,1)
     nrhs=size(B,2)
-    if(n/=size(A,2)) then
-       stop 'Matrix must be square'
-    end if
+!    if(n/=size(A,2)) then
+!       stop 'Matrix must be square'
+!    end if
     D=A
     C=B
     lwrk=-1
@@ -439,9 +440,9 @@ contains
     real(dp), dimension(size(A,2)), intent(out):: syslv
     real(dp), dimension(size(A,1),size(A,2)):: D
     real(dp), dimension(size(A,2)):: c
-    if(size(A,1)/=size(A,2)) then
-       stop 'Matrix must be square'
-    end if
+!    if(size(A,1)/=size(A,2)) then
+!       stop 'Matrix must be square'
+!    end if
     call symeigen(A,c,D)
     syslv=b.mm.D
     where (abs(c) < 1.0e-8_dp)
@@ -460,9 +461,9 @@ contains
     real(dp), dimension(size(A,2),size(B,2)), intent(out):: syslv
     real(dp), dimension(size(A,1),size(A,2)):: D
     real(dp), dimension(size(A,2)):: c
-    if(size(A,1)/=size(A,2)) then
-       stop 'Matrix must be square'
-    end if
+!    if(size(A,1)/=size(A,2)) then
+!       stop 'Matrix must be square'
+!    end if
     call symeigen(A,c,D)
     syslv=D.tmm.b
     where (abs(c) < 1.0e-8_dp)
@@ -972,7 +973,7 @@ contains
 !       end if
        iter=iter+1
        if ( bestval <= VTR .and. refresh > 0) then
-          write(unit=*, FMT=*) 'The best fitness is smaller than VTR' 
+!          write(unit=*, FMT=*) 'The best fitness is smaller than VTR' 
           exit
        endif
     end do
@@ -1703,7 +1704,7 @@ end subroutine R_dmZIP_init_param
 
 subroutine R_dmZIP(X,Z,Dat,offt,ggt,prob,beta,gamma,llike,Hess,nn,ni,no,npp,npl,ng,ierr) 
   use dat_mod
-  use matrix, only: operator(.kp.), printmat
+  use matrix, only: operator(.kp.)
   use Newton_mod
   use gamma_mod
   use merge_sort_mod
@@ -1748,7 +1749,7 @@ subroutine R_dmZIP(X,Z,Dat,offt,ggt,prob,beta,gamma,llike,Hess,nn,ni,no,npp,npl,
   g_nzero=1.0_dp-g_zero
   g_llc=g_nzero*lgammafn(g_y+1.0_dp)
   if (minval(prob) < 2.0_dp/real(g_ni,dp)) then
-     write(*,*) "R_dmZIP: prob -> 0!"
+!     write(*,*) "R_dmZIP: prob -> 0!"
      nullify(g_gwt,g_llikei)
      deallocate(g_X,g_Z,g_y,g_pr_wt,g_llike_t,g_zero,g_nzero,g_llc,g_expd,g_miss,g_offt,g_indi)
      ierr=-99
@@ -2377,7 +2378,7 @@ end subroutine R_dmZIPt_init_param
 
 subroutine R_dmZIPt(X,Dat,offt,ggt,prob,beta,tau,llike,Hess,nn,ni,no,npp,ng,ierr) 
   use dat_mod
-  use matrix, only: operator(.kp.), printmat
+  use matrix, only: operator(.kp.)
   use Newton_mod
   use gamma_mod
   use merge_sort_mod
@@ -2419,7 +2420,7 @@ subroutine R_dmZIPt(X,Dat,offt,ggt,prob,beta,tau,llike,Hess,nn,ni,no,npp,ng,ierr
   g_nzero=1.0_dp-g_zero
   g_llc=g_nzero*lgammafn(g_y+1.0_dp)
   if (minval(prob) < 2.0_dp/real(g_ni,dp)) then
-     write(*,*) "R_dmZIPt: prob -> 0!"
+!     write(*,*) "R_dmZIPt: prob -> 0!"
      nullify(g_gwt,g_llikei)
      deallocate(g_X,g_y,g_pr_wt,g_llike_t,g_zero,g_nzero,g_llc,g_expd,g_miss,g_offt,g_indi)
      ierr=-99
