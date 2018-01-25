@@ -55,6 +55,7 @@ module dat_mod
   real(dp), pointer:: g_llikei(:) => null(), g_gwt(:) => null()
   logical:: isEM
 end module dat_mod
+
 module gamma_mod
   use mytype
   implicit none
