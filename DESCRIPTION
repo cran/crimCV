@@ -1,13 +1,13 @@
 Package: crimCV
-Version: 0.9.6
+Version: 1.0.0
+Date: 2023-09-06
 Title: Group-Based Modelling of Longitudinal Data
-Author: Jason D. Nielsen <jdn@math.carleton.ca>
+Author: Jason D. Nielsen <drjdnielsen@gmail.com>
 Maintainer: Jason D. Nielsen <jdn@math.carleton.ca>
-Depends: R (>= 2.10.0), splines
+Depends: R (>= 3.5.0), splines
 Description: A finite mixture of Zero-Inflated Poisson (ZIP) models for analyzing criminal trajectories.
 License: GPL (>= 2)
-Date: 2018-01-24
 NeedsCompilation: yes
-Packaged: 2018-01-25 00:24:28 UTC; jdn
+Packaged: 2023-09-09 18:26:38 UTC; jdn
 Repository: CRAN
-Date/Publication: 2018-01-25 04:16:46 UTC
+Date/Publication: 2023-09-09 19:30:02 UTC

@@ -1,6 +1,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Copyright (C) 2011 Jason D. Nielsen
+!!! Copyright (C) 2023 Jason D. Nielsen
 !!!
 !!! This program is free software! you can redistribute it and/or modify
 !!! it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@ module mytype
   integer, parameter:: dp=kind(1.0D0)
   integer, parameter:: qp=2*dp
 end module mytype
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Copyright (C) 2011 Jason D. Nielsen
+!!! Copyright (C) 2023 Jason D. Nielsen
 !!!
 !!! This program is free software! you can redistribute it and/or modify
 !!! it under the terms of the GNU General Public License as published by
@@ -158,7 +159,7 @@ end module gamma_mod
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Copyright (C) 2011 Jason D. Nielsen
+!!! Copyright (C) 2023 Jason D. Nielsen
 !!!
 !!! This program is free software! you can redistribute it and/or modify
 !!! it under the terms of the GNU General Public License as published by
@@ -558,6 +559,7 @@ contains
   end subroutine flsqr
 
 end module matrix
+
 ! This code was modified by Jason D. Nielsen 
 module merge_sort_mod
   use mytype
@@ -769,12 +771,87 @@ End Subroutine mrgrnk
 
 end module merge_sort_mod
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!
+!!! Copyright (C) 2023 Jason D. Nielsen
+!!!
+!!! This program is free software! you can redistribute it and/or modify
+!!! it under the terms of the GNU General Public License as published by
+!!! the Free Software Foundation! either version 2 of the License, or
+!!! (at your option) any later version.
+!!!
+!!! This program is distributed in the hope that it will be useful,
+!!! but WITHOUT ANY WARRANTY! without even the implied warranty of
+!!! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!!! GNU General Public License for more details.
+!!!
+!!! You should have received a copy of the GNU General Public License
+!!! along with this program! if not, write to the Free Software
+!!! Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111, USA
+!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+module rrand
+  use mytype
+  implicit none
+
+  public
+  private:: ranu_s, ranu_v
+  
+  interface r_random_number
+     module procedure ranu_s, ranu_v, ranu_m
+  end interface r_random_number
+
+contains
+
+  subroutine r_set_random
+    implicit none
+    call sRNG()
+  end subroutine r_set_random
+
+  subroutine r_close_random
+    implicit none
+    call eRNG()
+  end subroutine r_close_random
+  
+  subroutine ranu_s(rv)
+    implicit none
+    real(dp), intent(inout):: rv
+    real(dp):: runi
+    rv = runi()
+  end subroutine ranu_s
+
+  subroutine ranu_v(rv)
+    implicit none
+    real(dp), dimension(:), intent(inout):: rv
+    real(dp):: runi
+    integer:: i
+    do i=1,size(rv)
+       rv(i) = runi()
+    end do
+  end subroutine ranu_v
+
+  subroutine ranu_m(rv)
+    implicit none
+    real(dp), dimension(:,:), intent(inout):: rv
+    real(dp):: runi
+    integer:: i, j
+    do j=1,size(rv,2)
+       do i=1,size(rv,1)
+          rv(i,j) = runi()
+       end do
+    end do
+  end subroutine ranu_m
+  
+end module rrand
+
 ! Modified by Jason D. Nielsen
 module DE_mod
   use mytype
+  use rrand
   implicit none
   private
-  public:: DE_optim, set_random_seed
+  public:: DE_optim
 
 contains
 
@@ -843,7 +920,7 @@ contains
     real(dp), dimension(Dim_XC) :: bestmemit_XC, bestmem_XC
     real(dp), dimension(Dim_XC) :: rand_C1
     integer, dimension(2), intent(in) :: method
-    intrinsic max, min, random_number, mod, abs, any, all, maxloc
+    intrinsic max, min, mod, abs, any, all, maxloc
     interface
        subroutine obj(n,x,objval)
          use mytype
@@ -857,7 +934,7 @@ contains
     
     pop_XC=0.0_dp
     do i=1,NP
-       call random_number(rand_C1)
+       call r_random_number(rand_C1)
        pop_XC(i,:)=XCmin+rand_C1*(XCmax-XCmin)
     end do
     
@@ -906,9 +983,9 @@ contains
        !----- Generating a random sacling factor--------------------------------!
        select case (method(1))
        case (1)
-          call random_number(F_XC)
+          call r_random_number(F_XC)
        case(2)
-          call random_number(F_XC)
+          call r_random_number(F_XC)
           F_XC=2.0_dp*F_XC-1.0_dp
        end select
        
@@ -929,12 +1006,12 @@ contains
        case (5)
           ui_XC=popold_XC(a5,:)+F_XC*(popold_XC(a1,:)-popold_XC(a2,:)+popold_XC(a3,:)-popold_XC(a4,:))
        case (6) ! A linear crossover combination of bm_XC and popold_XC
-          if (method(2) == 1) call random_number(F_CR) 
+          if (method(2) == 1) call r_random_number(F_CR) 
           ui_XC=popold_XC+F_CR*(bm_XC-popold_XC)+F_XC*(popold_XC(a1,:)-popold_XC(a2,:))          
        end select
        !!--------------------------------------------------------------------------!!
        !!------Crossover operation-------------------------------------------------!!
-       call random_number(rand_XC)
+       call r_random_number(rand_XC)
        mui_XC=0.0_dp
        mpo_XC=0.0_dp
        where (rand_XC < CR_XC)
@@ -1003,8 +1080,7 @@ contains
     integer :: number, i, j, k
     integer, dimension(num) :: randperm
     real(dp), dimension(num) :: rand2
-    intrinsic random_number
-    call random_number(rand2)
+    call r_random_number(rand2)
     do i=1,num
        number=1
        do j=1,num
@@ -1021,28 +1097,12 @@ contains
     end do
     return
   end function randperm
-  
-  subroutine set_random_seed
-    ! Use time stamp to init the random number generator.  For many f95 compilers this is done
-    ! using the intrisic subroutine random_seed() but this behavior isn't enforced by the 
-    ! standard so this function give a "universal" method of seeding the RNG that should work on
-    ! any f95 standard complying compiler.
-    implicit none
-    integer :: i, n, clock
-    integer, allocatable :: seed(:)          
-    call random_seed(size=n)
-    allocate( seed(n) )          
-    call system_clock(COUNT=clock)          
-    seed = clock + 37 * (/ (i - 1, i = 1, n) /)
-    call random_seed(PUT=seed)          
-    deallocate( seed )
-  end subroutine set_random_seed
 
 end module DE_mod
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Copyright (C) 2011 Jason D. Nielsen
+!!! Copyright (C) 2023 Jason D. Nielsen
 !!!
 !!! This program is free software! you can redistribute it and/or modify
 !!! it under the terms of the GNU General Public License as published by
@@ -1132,7 +1192,7 @@ end module Newton_mod
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Copyright (C) 2011 Jason D. Nielsen
+!!! Copyright (C) 2023 Jason D. Nielsen
 !!!
 !!! This program is free software! you can redistribute it and/or modify
 !!! it under the terms of the GNU General Public License as published by
@@ -1271,7 +1331,7 @@ end module dmZIP_shared_mod
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Copyright (C) 2011 Jason D. Nielsen
+!!! Copyright (C) 2023 Jason D. Nielsen
 !!!
 !!! This program is free software! you can redistribute it and/or modify
 !!! it under the terms of the GNU General Public License as published by
@@ -1451,9 +1511,10 @@ contains
   end subroutine em_update
 
 end module dmZIP_EM_mod
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Copyright (C) 2011 Jason D. Nielsen
+!!! Copyright (C) 2023 Jason D. Nielsen
 !!!
 !!! This program is free software! you can redistribute it and/or modify
 !!! it under the terms of the GNU General Public License as published by
@@ -1645,6 +1706,7 @@ subroutine R_dmZIP_init_param(X,Z,Dat,offt,pparam,pllike,ni,no,npp,npl,ng,npop)
   use dmZIP_mod
   use matrix, only: operator(.kp.)
   use gamma_mod
+  use rrand
   use DE_mod
   implicit none
   integer, intent(in):: ni, no, npp, npl, ng, npop
@@ -1686,9 +1748,10 @@ subroutine R_dmZIP_init_param(X,Z,Dat,offt,pparam,pllike,ni,no,npp,npl,ng,npop)
   nparm=(g_npp+g_npl+1)*g_ng
   xmin=1.0e-9_dp
   xmax=1.0_dp
-  call set_random_seed
+  call r_set_random
   call DE_optim(pfun,nparm,xmin,xmax,VTR,npop,itermax,F_XC,CR_XC,strategy,refresh,pparam,pllike, &
        & nfeval,F_CR,method)
+  call r_close_random
   call mrgrnk(pllike,irank)
   pllike=pllike(irank)
   pparam=pparam(irank,:)
@@ -1793,9 +1856,10 @@ subroutine R_dmZIP(X,Z,Dat,offt,ggt,prob,beta,gamma,llike,Hess,nn,ni,no,npp,npl,
   nullify(g_gwt,g_llikei)
   deallocate(g_X,g_Z,g_y,g_pr_wt,g_llike_t,g_zero,g_nzero,g_llc,g_expd,g_miss,g_offt,g_indi)
 end subroutine R_dmZIP
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Copyright (C) 2011 Jason D. Nielsen
+!!! Copyright (C) 2023 Jason D. Nielsen
 !!!
 !!! This program is free software! you can redistribute it and/or modify
 !!! it under the terms of the GNU General Public License as published by
@@ -1963,7 +2027,7 @@ end module dmZIPt_shared_mod
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Copyright (C) 2011 Jason D. Nielsen
+!!! Copyright (C) 2023 Jason D. Nielsen
 !!!
 !!! This program is free software! you can redistribute it and/or modify
 !!! it under the terms of the GNU General Public License as published by
@@ -2134,9 +2198,10 @@ contains
   end subroutine em_update
 
 end module dmZIPt_EM_mod
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Copyright (C) 2011 Jason D. Nielsen
+!!! Copyright (C) 2023 Jason D. Nielsen
 !!!
 !!! This program is free software! you can redistribute it and/or modify
 !!! it under the terms of the GNU General Public License as published by
@@ -2320,6 +2385,7 @@ subroutine R_dmZIPt_init_param(X,Dat,offt,pparam,pllike,ni,no,npp,ng,npop)
   use dmZIPt_mod
   use matrix, only: operator(.kp.)
   use gamma_mod
+  use rrand
   use DE_mod
   implicit none
   integer, intent(in):: ni, no, npp, ng, npop
@@ -2359,9 +2425,10 @@ subroutine R_dmZIPt_init_param(X,Dat,offt,pparam,pllike,ni,no,npp,ng,npop)
   nparm=(g_npp+2)*g_ng
   xmin=1.0e-9_dp
   xmax=1.0_dp
-  call set_random_seed
+  call r_set_random
   call DE_optim(pfun,nparm,xmin,xmax,VTR,npop,itermax,F_XC,CR_XC,strategy,refresh,pparam,pllike, &
        & nfeval,F_CR,method)
+  call r_close_random
   call mrgrnk(pllike,irank)
   pllike=pllike(irank)
   pparam=pparam(irank,:)

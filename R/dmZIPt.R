@@ -10,7 +10,7 @@ function (Dat, X, ng, rcv = TRUE, init = 20, Risk = NULL)
         Dmu <- rep(Dmu, ni)
         Dmu <- matrix(Dmu, no, ni)
         Dmu <- t(Dmu)
-        Dmu[Dat > -0.1] <- 0
+        Dmu[Dat > -0.10000000000000001] <- 0
         Datm <- Datm + Dmu
         Frtr <- .Fortran("r_dmzipt_init_param", as.double(X), 
             as.double(Datm), as.double(Risk), pparam = as.double(pparam), 
@@ -78,7 +78,7 @@ function (Dat, X, ng, rcv = TRUE, init = 20, Risk = NULL)
             bllike <- c(bllike, tFrtr$llike)
         }
         else {
-            if (!(min(abs(tFrtr$llike - bllike)) < 1e-05)) {
+            if (!(min(abs(tFrtr$llike - bllike)) < 1.0000000000000001e-05)) {
                 beta <- matrix(tFrtr$beta, npp, ng)
                 tau <- exp(tFrtr$tau)
                 prob <- tFrtr$prob
